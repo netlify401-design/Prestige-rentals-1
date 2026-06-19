@@ -1,140 +1,264 @@
-import { useState, useEffect, useRef } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Agency Fleet</title>
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #45f3ff;
+            margin-bottom: 10px;
+        }
+        header p {
+            color: #c5c6c7;
+        }
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        .tab-btn {
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            background-color: #1f2833;
+            color: #c5c6c7;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background-color: #45f3ff;
+            color: #0b0c10;
+        }
+        .fleet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: #1f2833;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        .card-body {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .cat-tag {
+            font-size: 0.85rem;
+            color: #45f3ff;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .badge {
+            background-color: #ff4757;
+            color: #fff;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .card h3 {
+            font-size: 1.4rem;
+            margin: 0 0 5px 0;
+            color: #fff;
+        }
+        .state-tag {
+            font-size: 0.9rem;
+            color: #86c232;
+            margin: 0 0 15px 0;
+            font-weight: 500;
+        }
+        .specs-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .spec-chip {
+            background-color: #0b0c10;
+            color: #c5c6c7;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #45f3ff33;
+        }
+        .card-footer {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+        }
+        .rate-label {
+            font-size: 0.75rem;
+            color: #c5c6c7;
+            text-transform: uppercase;
+        }
+        .price-val {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #45f3ff;
+        }
+        .book-btn {
+            background-color: #45f3ff;
+            color: #0b0c10;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .book-btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
 
-// ─── VEHICLE & FLEET DATA ─────────────────────────────────────────────────────
-// Each asset has a `wiki` field = exact Wikipedia article title used to fetch
-// the main image from the Wikimedia API. 100% guaranteed correct images.
+    <header>
+        <h1>Premium Agency Fleet</h1>
+        <p>Select a class below to view our curated vehicles, watercraft, and air experiences across Australia.</p>
+    </header>
 
-const CATEGORIES = [
-  {
-    id: "supercars_cars",
-    label: "🏎️ Luxury & Supercars",
-    emoji: "🏎️",
-    vehicles: [
-      { name: "Lamborghini Huracán LP610-4", cat: "Supercar", price: "$2,600/day", specs: ["602HP", "V10 Engine", "AWD", "0-100 km/h in 3.2s"], wiki: "Lamborghini Huracán", badge: "Top Choice", state: "Tasmania (Hobart)", dark: true },
-      { name: "Ferrari 488 GTB", cat: "Supercar", price: "$2,600/day", specs: ["661HP", "Twin-Turbo V8", "RWD", "Mid-Engine Sport"], wiki: "Ferrari 488", badge: "Exclusive", state: "Tasmania (Hobart)", dark: true },
-      { name: "Porsche Boxster / Cayman", cat: "Convertible Sports Car", price: "$1,200/day", specs: ["300HP", "Mid-Engine", "RWD", "Drop Top Experience"], wiki: "Porsche Boxster", state: "Tasmania (Hobart)", dark: false },
-      { name: "Range Rover Sport", cat: "Luxury SUV", price: "$700/day", specs: ["Premium Audio", "Terrain Control", "Luxury Interior", "4x4 Capability"], wiki: "Range Rover Sport", state: "Tasmania (Hobart)", dark: false },
-      { name: "Mercedes-AMG C 63 Coupe", cat: "Performance Coupe", price: "$700/day", specs: ["503HP", "Biturbo V8", "RWD", "AMG Sports Tuned"], wiki: "Mercedes-AMG C-Class", state: "Tasmania (Hobart)", dark: false },
-      { name: "BMW M3 Sedan", cat: "Luxury Sedan", price: "Contact Us", specs: ["473HP", "Twin-Turbo Inline-6", "M Performance", "Track Ready"], wiki: "BMW M3", state: "Tasmania (Hobart)", dark: false }
-    ]
-  },
-  {
-    id: "yachts",
-    label: "⚓ Luxury Yachts",
-    emoji: "⚓",
-    vehicles: [
-      { name: "Paradise", cat: "Ultra-Luxury Superyacht", price: "$36,000", specs: ["Multi-Deck", "Tropical Island Ready", "VIP Staterooms", "Ultimate Elite Charter"], wiki: "Superyacht", badge: "Flagship", state: "Western Australia (Perth)", dark: true },
-      { name: "Aquabay", cat: "Luxury Motor Yacht", price: "$5,000", specs: ["High-Speed Cruising", "Sleek Aesthetics", "Al Fresco Dining", "Premium Styling"], wiki: "Yacht", badge: "High Demand", state: "New South Wales (Sydney)", dark: true },
-      { name: "Ava", cat: "Luxury Superyacht", price: "$4,070", specs: ["Massive Multi-Deck", "Teak Decks", "Sky Lounge", "Stunning Flybridge"], wiki: "Yacht", state: "Queensland (Gold Coast)", dark: false },
-      { name: "Aki", cat: "Luxury Cruising Yacht", price: "$3,267", specs: ["Two-Tone Navy Hull", "Skyscraper Backdrop Cruise", "Expansive Deck Lounge"], wiki: "Yacht", state: "Queensland (Gold Coast)", dark: false },
-      { name: "The Cove", cat: "Luxury Sunset Cruiser", price: "$3,220", specs: ["Custom Blue Under-glow", "Multi-Deck Layout", "Island Destination Setup"], wiki: "Yacht", state: "Queensland (Gold Coast)", dark: false },
-      { name: "Queen Royal", cat: "Premium Motor Yacht", price: "$3,000", specs: ["Spacious Main Cabin", "Calm Water Cruiser", "Panoramic Windows"], wiki: "Yacht", state: "Victoria (Melbourne & Geelong)", dark: false },
-      { name: "MV Pearl", cat: "Luxury Motor Yacht", price: "$2,500", specs: ["Dynamic Performance Hull", "Sun-Glinted Entertainment Deck", "VIP Corporate Charter"], wiki: "Yacht", state: "Victoria (Melbourne & Geelong)", dark: false },
-      { name: "Oscar 2", cat: "Multi-Deck Superyacht", price: "$2,420", specs: ["Large Anchor Bays", "Spacious Gathering Decks", "High-End Entertaining"], wiki: "Superyacht", state: "New South Wales (Sydney)", dark: false },
-      { name: "Platinum", cat: "Luxury Sports Yacht", price: "$2,300", specs: ["Wake-skate Compatible", "Tender Jet Boat Attached", "Active Water Sports Setup"], wiki: "Yacht", state: "Western Australia (Perth)", dark: false },
-      { name: "Royal Prestige", cat: "Sport Yacht", price: "$2,000", specs: ["Sleek Dark Hull", "Night Cruise Under-glow", "VIP Hosting Capacity"], wiki: "Yacht", state: "Victoria (Melbourne & Geelong)", dark: true },
-      { name: "Prestige Lady", cat: "Multi-Deck Cruiser Boat", price: "$2,000", specs: ["Open Bow Design", "Leisure Cruise Standard", "Large Guest Capacity"], wiki: "Yacht", state: "Victoria (Melbourne & Geelong)", dark: false },
-      { name: "Sovereign Lady", cat: "Luxury Cruise Boat", price: "$1,500", specs: ["Brilliant Turquoise Setup", "Side Tender Dinghy Included", "Massive Passenger Bow"], wiki: "Yacht", state: "Western Australia (Perth)", dark: false },
-      { name: "Gravity", cat: "Sleek Cruiser Yacht", price: "$1,350/hr", specs: ["Dark Grey Hull Profile", "Sydney Skyline Views", "Modern Clean Interior"], wiki: "Yacht", state: "New South Wales (Sydney)", dark: true },
-      { name: "Como", cat: "Premium Leisure Yacht", price: "$990/hr", specs: ["Harbour Cruise Layout", "Skyline Viewing Deck", "Perfect Social Charter"], wiki: "Yacht", state: "New South Wales (Sydney)", dark: false },
-      { name: "Riviera 5000", cat: "Luxury Sport Cruiser", price: "$800", specs: ["Sleek White Profile", "Scenic Coastline Performance", "Hydraulic Swim Platform"], wiki: "Yacht", state: "Western Australia (Perth)", dark: false },
-      { name: "Epsilon", cat: "Sleek Sailing Yacht", price: "$649", specs: ["Monohull Setup", "Single-Mast Sail", "Dusk Skyline Cruising"], wiki: "Sailing yacht", state: "Queensland (Gold Coast)", dark: false },
-      { name: "Nevaeah Catamaran", cat: "Dual-Hull Sailing Catamaran", price: "$523", specs: ["Twin Hull Stability", "Navy Main Sail Cover", "Shallow Bay Navigating"], wiki: "Catamaran", state: "Western Australia (Perth)", dark: false },
-      { name: "Life's Good", cat: "Multi-Deck Catamaran Cruiser", price: "$649", specs: ["Dual-Hull Space Maximizer", "Flybridge Entertaining", "Coastal City Explorer"], wiki: "Catamaran", state: "Queensland (Gold Coast)", dark: false },
-      { name: "Benetti 110", cat: "High-End Superyacht", price: "$1,500/hr", specs: ["World-Class Superyacht Design", "Ocean Wave Piercing Hull", "Expansive Sun Lounging"], wiki: "Benetti", state: "Queensland (Gold Coast)", dark: true }
-    ]
-  },
-  {
-    id: "aircraft",
-    label: "🚁 Helicopter Tours",
-    emoji: "🚁",
-    vehicles: [
-      { name: "Bell Longranger", cat: "Luxury Turbine Helicopter", price: "$220 / PP", specs: ["Bayside Flying Experience", "Smooth Extended Cabin", "Panoramic Aviation Windows"], wiki: "Bell 206", badge: "Best Seller", state: "Victoria (Essendon Airport)", dark: true },
-      { name: "Robinson R44", cat: "Scenic Excursion Helicopter", price: "Inquire for Rates", specs: ["Bayside & Yarra Valley Flights", "Peninsula Hot Springs Transfers", "Phillip Island & Great Ocean Road Outings"], wiki: "Robinson R44", state: "Victoria (Essendon Airport)", dark: true }
-    ]
-  }
-];
+    <div class="tabs-container" id="tabsBox"></div>
+    <div class="fleet-grid" id="fleetBox"></div>
 
-export default function FleetShowcase() {
-  const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].id);
+    <script>
+        const CATEGORIES = [
+          {
+            id: "supercars_cars",
+            label: "🏎️ Luxury & Supercars",
+            vehicles: [
+              { name: "Lamborghini Huracán LP610-4", cat: "Supercar", price: "$2,600/day", specs: ["602HP", "V10 Engine", "AWD"], badge: "Top Choice", state: "Tasmania (Hobart)" },
+              { name: "Ferrari 488 GTB", cat: "Supercar", price: "$2,600/day", specs: ["661HP", "Twin-Turbo V8", "RWD"], badge: "Exclusive", state: "Tasmania (Hobart)" },
+              { name: "Porsche Boxster / Cayman", cat: "Convertible Sports Car", price: "$1,200/day", specs: ["300HP", "Mid-Engine", "Drop Top"], state: "Tasmania (Hobart)" },
+              { name: "Range Rover Sport", cat: "Luxury SUV", price: "$700/day", specs: ["Premium Audio", "Terrain Control", "4x4"], state: "Tasmania (Hobart)" },
+              { name: "Mercedes-AMG C 63 Coupe", cat: "Performance Coupe", price: "$700/day", specs: ["503HP", "Biturbo V8", "AMG Tuned"], state: "Tasmania (Hobart)" },
+              { name: "BMW M3 Sedan", cat: "Luxury Sedan", price: "Contact Us", specs: ["473HP", "Twin-Turbo I6", "M Performance"], state: "Tasmania (Hobart)" }
+            ]
+          },
+          {
+            id: "yachts",
+            label: "⚓ Luxury Yachts",
+            vehicles: [
+              { name: "Paradise", cat: "Ultra-Luxury Superyacht", price: "$36,000", specs: ["Multi-Deck", "VIP Staterooms", "Ultimate Charter"], badge: "Flagship", state: "Western Australia (Perth)" },
+              { name: "Aquabay", cat: "Luxury Motor Yacht", price: "$5,000", specs: ["High-Speed Cruising", "Al Fresco Dining", "Premium Styling"], badge: "High Demand", state: "New South Wales (Sydney)" },
+              { name: "Ava", cat: "Luxury Superyacht", price: "$4,070", specs: ["Massive Multi-Deck", "Sky Lounge", "Flybridge"], state: "Queensland (Gold Coast)" },
+              { name: "Aki", cat: "Luxury Cruising Yacht", price: "$3,267", specs: ["Two-Tone Navy Hull", "Expansive Deck Lounge"], state: "Queensland (Gold Coast)" },
+              { name: "The Cove", cat: "Luxury Sunset Cruiser", price: "$3,220", specs: ["Custom Blue Underglow", "Island Destination Layout"], state: "Queensland (Gold Coast)" },
+              { name: "Queen Royal", cat: "Premium Motor Yacht", price: "$3,000", specs: ["Spacious Main Cabin", "Calm Water Cruiser"], state: "Victoria (Melbourne & Geelong)" },
+              { name: "MV Pearl", cat: "Luxury Motor Yacht", price: "$2,500", specs: ["Dynamic Performance Hull", "VIP Corporate Charter"], state: "Victoria (Melbourne & Geelong)" },
+              { name: "Oscar 2", cat: "Multi-Deck Superyacht", price: "$2,420", specs: ["Large Anchor Bays", "High-End Entertaining"], state: "New South Wales (Sydney)" },
+              { name: "Platinum", cat: "Luxury Sports Yacht", price: "$2,300", specs: ["Wake-skate Compatible", "Tender Jet Boat Included"], state: "Western Australia (Perth)" },
+              { name: "Royal Prestige", cat: "Sport Yacht", price: "$2,000", specs: ["Sleek Dark Hull", "Night Cruise Underglow"], state: "Victoria (Melbourne & Geelong)" },
+              { name: "Prestige Lady", cat: "Multi-Deck Cruiser", price: "$2,000", specs: ["Open Bow Design", "Large Guest Capacity"], state: "Victoria (Melbourne & Geelong)" },
+              { name: "Sovereign Lady", cat: "Luxury Cruise Boat", price: "$1,500", specs: ["Brilliant Turquoise Setup", "Side Tender Included"], state: "Western Australia (Perth)" },
+              { name: "Gravity", cat: "Sleek Cruiser Yacht", price: "$1,350/hr", specs: ["Dark Grey Profile", "Sydney Skyline Views"], state: "New South Wales (Sydney)" },
+              { name: "Como", cat: "Premium Leisure Yacht", price: "$990/hr", specs: ["Harbour Cruise Layout", "Perfect Social Charter"], state: "New South Wales (Sydney)" },
+              { name: "Riviera 5000", cat: "Luxury Sport Cruiser", price: "$800", specs: ["Sleek White Profile", "Hydraulic Swim Platform"], state: "Western Australia (Perth)" },
+              { name: "Epsilon", cat: "Sleek Sailing Yacht", price: "$649", specs: ["Monohull Setup", "Single-Mast Sail"], state: "Queensland (Gold Coast)" },
+              { name: "Nevaeah Catamaran", cat: "Sailing Catamaran", price: "$523", specs: ["Twin Hull Stability", "Navy Main Sail Cover"], state: "Western Australia (Perth)" },
+              { name: "Life's Good", cat: "Catamaran Cruiser", price: "$649", specs: ["Flybridge Entertaining", "Coastal Explorer"], state: "Queensland (Gold Coast)" },
+              { name: "Benetti 110", cat: "High-End Superyacht", price: "$1,500/hr", specs: ["World-Class Design", "Ocean Wave Piercing"], state: "Queensland (Gold Coast)" }
+            ]
+          },
+          {
+            id: "aircraft",
+            label: "🚁 Helicopter Tours",
+            vehicles: [
+              { name: "Bell Longranger", cat: "Turbine Helicopter", price: "$220 / PP", specs: ["Bayside Flying", "Extended Cabin", "Panoramic Windows"], badge: "Best Seller", state: "Victoria (Essendon Airport)" },
+              { name: "Robinson R44", cat: "Scenic Helicopter", price: "Inquire Rates", specs: ["Yarra Valley Flights", "Hot Springs Transfers", "Great Ocean Road"], state: "Victoria (Essendon Airport)" }
+            ]
+          }
+        ];
 
-  return (
-    <div style={{ backgroundColor: "#0b0c10", color: "#fff", minHeight: "100vh", fontFamily: "sans-serif", padding: "20px" }}>
-      <header style={{ textAlign: "center", marginBottom: "40px" }}>
-        <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "2px", color: "#45f3ff" }}>
-          Premium Agency Fleet
-        </h1>
-        <p style={{ color: "#c5c6c7" }}>Select a class below to view our curated vehicles, watercraft, and air experiences across Australia.</p>
-      </header>
+        let currentCategory = CATEGORIES[0].id;
 
-      {/* Category Selection Tabs */}
-      <div style={{ display: "flex", justifyContent: "center", gap: "15px", flexWrap: "wrap", marginBottom: "40px" }}>
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setActiveCategory(cat.id)}
-            style={{
-              padding: "12px 24px",
-              fontSize: "1rem",
-              borderRadius: "30px",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "600",
-              backgroundColor: activeCategory === cat.id ? "#45f3ff" : "#1f2833",
-              color: activeCategory === cat.id ? "#0b0c10" : "#c5c6c7",
-              transition: "all 0.3s ease"
-            }}
-          >
-            {cat.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Dynamic Fleet Asset Rendering Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "30px", maxWidth: "1200px", margin: "0 auto" }}>
-        {CATEGORIES.find((cat) => cat.id === activeCategory)?.vehicles.map((item, index) => (
-          <div key={index} style={{ backgroundColor: "#1f2833", borderRadius: "12px", overflow: "hidden", boxShadow: "0 4px 15px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column" }}>
-            
-            {/* Asset Informational Body */}
-            <div style={{ padding: "25px", flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "between" }}>
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "10px" }}>
-                  <span style={{ fontSize: "0.85rem", color: "#45f3ff", textTransform: "uppercase", fontWeight: "bold", letterSpacing: "1px" }}>{item.cat}</span>
-                  {item.badge && (
-                    <span style={{ backgroundColor: "#ff4757", color: "#fff", fontSize: "0.75rem", padding: "4px 8px", borderRadius: "4px", fontWeight: "bold" }}>
-                      {item.badge}
-                    </span>
-                  )}
-                </div>
-                
-                <h3 style={{ fontSize: "1.4rem", margin: "0 0 5px 0", color: "#fff" }}>{item.name}</h3>
-                <p style={{ fontSize: "0.9rem", color: "#86c232", margin: "0 0 15px 0", fontWeight: "500" }}>📍 {item.state}</p>
-                
-                {/* Visual Technical Specification Chips */}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "20px" }}>
-                  {item.specs.map((spec, sIdx) => (
-                    <span key={sIdx} style={{ backgroundColor: "#0b0c10", color: "#c5c6c7", fontSize: "0.8rem", padding: "4px 10px", borderRadius: "20px", border: "1px solid #45f3ff33" }}>
-                      {spec}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Pricing & Reservation CTAs */}
-              <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "15px", borderTop: "1px solid #333" }}>
-                <div>
-                  <div style={{ fontSize: "0.75rem", color: "#c5c6c7", textTransform: "uppercase" }}>Rate</div>
-                  <div style={{ fontSize: "1.3rem", fontWeight: "bold", color: "#45f3ff" }}>{item.price}</div>
-                </div>
-                <button style={{ backgroundColor: "#45f3ff", color: "#0b0c10", border: "none", padding: "10px 18px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer", transition: "0.2s" }}>
-                  Book Now
+        function renderTabs() {
+            const tabsBox = document.getElementById('tabsBox');
+            tabsBox.innerHTML = CATEGORIES.map(cat => `
+                <button class="tab-btn ${cat.id === currentCategory ? 'active' : ''}" onclick="switchCategory('${cat.id}')">
+                    ${cat.label}
                 </button>
-              </div>
+            `).join('');
+        }
 
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+        function renderFleet() {
+            const fleetBox = document.getElementById('fleetBox');
+            const activeCat = CATEGORIES.find(cat => cat.id === currentCategory);
+            
+            fleetBox.innerHTML = activeCat.vehicles.map(item => `
+                <div class="card">
+                    <div class="card-body">
+                        <div>
+                            <div class="card-header">
+                                <span class="cat-tag">${item.cat}</span>
+                                ${item.badge ? `<span class="badge">${item.badge}</span>` : ''}
+                            </div>
+                            <h3>${item.name}</h3>
+                            <p class="state-tag">📍 ${item.state}</p>
+                            <div class="specs-container">
+                                ${item.specs.map(spec => `<span class="spec-chip">${spec}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div>
+                                <div class="rate-label">Rate</div>
+                                <div class="price-val">${item.price}</div>
+                            </div>
+                            <button class="book-btn" onclick="alert('Booking feature coming soon for ${item.name}!')">Book Now</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.switchCategory = function(catId) {
+            currentCategory = catId;
+            renderTabs();
+            renderFleet();
+        }
+
+        // Run on initial load
+        renderTabs();
+        renderFleet();
+    </script>
+</body>
+</html>
