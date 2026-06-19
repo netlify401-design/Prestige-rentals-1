@@ -1,0 +1,53 @@
+import { useState, useEffect, useRef } from "react";
+
+// ─── VEHICLE DATA ─────────────────────────────────────────────────────────────
+// Each vehicle has a `wiki` field = exact Wikipedia article title used to fetch
+// the main image from the Wikimedia API. 100% guaranteed correct images.
+
+const CATEGORIES = [
+  {
+    id: "gwagon",
+    label: "⭐ G Wagon",
+    emoji: "⭐",
+    vehicles: [
+      { name: "Mercedes G63 AMG", cat: "Signature SUV", price: "$990", specs: ["577HP","4×4²","Biturbo V8","Nappa Leather"], wiki: "Mercedes-AMG G 63", badge: "Most Booked", dark: false },
+      { name: "Mercedes G63 AMG Brabus", cat: "Modified SUV", price: "$1,400", specs: ["800HP","Brabus Tuned","Custom Interior","Street Legal"], wiki: "Brabus", badge: "Exclusive", dark: false },
+      { name: "Mercedes G550", cat: "Luxury SUV", price: "$790", specs: ["416HP","4.0L V8","4MATIC","Burmester Audio"], wiki: "Mercedes-Benz G-Class", dark: false },
+    ]
+  },
+  {
+    id: "luxury",
+    label: "🚗 Luxury Cars",
+    emoji: "🚗",
+    vehicles: [
+      { name: "Rolls-Royce Ghost", cat: "Ultra Luxury Saloon", price: "$2,400", specs: ["563HP","V12","Starlight Roof","AWD"], wiki: "Rolls-Royce Ghost (2020)", badge: "Pinnacle", dark: true },
+      { name: "Rolls-Royce Phantom", cat: "Ultra Luxury Saloon", price: "$3,200", specs: ["563HP","V12","Magic Carpet Ride","Bespoke"], wiki: "Rolls-Royce Phantom VIII", badge: "Flagship", dark: true },
+      { name: "Bentley Flying Spur", cat: "Grand Tourer", price: "$1,600", specs: ["626HP","W12","AWD","Air Suspension"], wiki: "Bentley Flying Spur (2019)", dark: false },
+      { name: "Bentley Mulsanne", cat: "Ultra Luxury Saloon", price: "$1,800", specs: ["505HP","6.75L V8","Handcrafted","RWD"], wiki: "Bentley Mulsanne (2010)", dark: false },
+      { name: "Aston Martin DB11", cat: "Grand Tourer", price: "$1,350", specs: ["503HP","V8 Biturbo","RWD","Carbon Roof"], wiki: "Aston Martin DB11", dark: false },
+      { name: "Mercedes-AMG S63", cat: "Executive Sedan", price: "$760", specs: ["503HP","V8","4MATIC+","Rear Suite"], wiki: "Mercedes-AMG S 63", dark: false },
+    ]
+  },
+  {
+    id: "suvs",
+    label: "🚙 SUVs",
+    emoji: "🚙",
+    vehicles: [
+      { name: "Lamborghini Urus", cat: "Super SUV", price: "$1,200", specs: ["650HP","AWD","Twin Turbo V8","Carbon Ceramic Brakes"], wiki: "Lamborghini Urus", badge: "Super SUV", dark: true },
+      { name: "Bentley Bentayga", cat: "Ultra Luxury SUV", price: "$1,100", specs: ["626HP","W12","AWD","Air Body Control"], wiki: "Bentley Bentayga", dark: true },
+      { name: "Range Rover SVR", cat: "Sport SUV", price: "$780", specs: ["575HP","Supercharged V8","AWD","Configurable Terrain"], wiki: "Range Rover Sport SVR", dark: false },
+      { name: "Range Rover Autobiography", cat: "Luxury SUV", price: "$720", specs: ["530HP","V8","AWD","Executive Rear Seats"], wiki: "Range Rover (L460)", dark: false },
+      { name: "Porsche Cayenne Turbo GT", cat: "Sport SUV", price: "$880", specs: ["631HP","AWD","PDK","Sport Chrono"], wiki: "Porsche Cayenne", dark: false },
+      { name: "Aston Martin DBX707", cat: "Sport Luxury SUV", price: "$1,050", specs: ["707HP","V8 Biturbo","AWD","9-Speed Auto"], wiki: "Aston Martin DBX", dark: false },
+      { name: "BMW X7 M60i", cat: "Luxury SUV", price: "$620", specs: ["530HP","Twin Turbo V8","AWD","7-Seater"], wiki: "BMW X7", dark: false },
+      { name: "Porsche Macan Turbo", cat: "Sport SUV", price: "$540", specs: ["434HP","AWD","Electric","PASM"], wiki: "Porsche Macan (J1)", dark: false },
+    ]
+  },
+  {
+    id: "supercars",
+    label: "🏎️ Supercars",
+    emoji: "🏎️",
+    vehicles: [
+      { name: "Ferrari SF90 Stradale", cat: "Hybrid Hypercar", price: "$2,000", specs: ["986HP","Hybrid V8","AWD","0-100 in 2.5s"], wiki: "Ferrari SF90 Stradale", badge: "Exclusive", dark: true },
+      { name: "Ferrari Roma", cat: "Grand Tourer", price: "$1,400", specs: ["620HP","V8","RWD","F1-Trac"], wiki: "Fe                                
+      
